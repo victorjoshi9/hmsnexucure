@@ -1,0 +1,776 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--ink:var(--color-text-primary);
+--ink2:var(--color-text-secondary);
+--ink3:var(--color-text-tertiary);
+--bg:var(--color-background-primary);
+--bg2:var(--color-background-secondary);
+--bg3:var(--color-background-tertiary);
+--border:var(--color-border-tertiary);
+--border2:var(--color-border-secondary);
+--success:var(--color-background-success);
+--success-t:var(--color-text-success);
+--warn:var(--color-background-warning);
+--warn-t:var(--color-text-warning);
+--danger:var(--color-background-danger);
+--danger-t:var(--color-text-danger);
+--info:var(--color-background-info);
+--info-t:var(--color-text-info);
+--accent:#185FA5;
+--accent-light:#E6F1FB;
+--accent-text:#0C447C;
+--r:var(--border-radius-md);
+--rl:var(--border-radius-lg);
+}
+body{font-family:var(--font-sans);font-size:13px;color:var(--ink);background:transparent}
+
+.doc{padding:0 0 3rem}
+
+.cover{padding:2rem 0 1.8rem;border-bottom:1px solid var(--border2);margin-bottom:2rem}
+.cover-eyebrow{font-size:11px;font-family:var(--font-mono);letter-spacing:.1em;color:var(--ink3);text-transform:uppercase;margin-bottom:.6rem}
+.cover-title{font-size:28px;font-weight:500;line-height:1.15;margin-bottom:.5rem}
+.cover-title span{color:var(--accent)}
+.cover-desc{font-size:13px;color:var(--ink2);line-height:1.65;max-width:560px;margin-bottom:1.2rem}
+.cover-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:11px;font-family:var(--font-mono);padding:3px 10px;border-radius:999px;border:0.5px solid var(--border2);color:var(--ink3)}
+.chip.blue{background:var(--info);color:var(--info-t);border-color:transparent}
+
+.toc{background:var(--bg2);border-radius:var(--rl);padding:1.2rem 1.4rem;margin-bottom:2.5rem}
+.toc-title{font-size:11px;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.9rem}
+.toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.toc-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border);cursor:pointer}
+.toc-row:hover .toc-lbl{color:var(--accent)}
+.toc-n{font-family:var(--font-mono);font-size:10px;color:var(--ink3);width:22px;flex-shrink:0}
+.toc-lbl{font-size:12px;color:var(--ink2);transition:color .15s}
+
+.section{margin-bottom:3rem;scroll-margin-top:16px}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem;padding-bottom:8px;border-bottom:0.5px solid var(--border2)}
+.sec-n{font-family:var(--font-mono);font-size:11px;color:var(--ink3)}
+.sec-title{font-size:17px;font-weight:500}
+.sec-tag{font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:3px;letter-spacing:.05em}
+.tag-blue{background:var(--info);color:var(--info-t)}
+.tag-green{background:var(--success);color:var(--success-t)}
+.tag-warn{background:var(--warn);color:var(--warn-t)}
+.tag-red{background:var(--danger);color:var(--danger-t)}
+
+p.prose{font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:.8rem}
+
+.screen-frame{background:var(--bg2);border-radius:var(--rl);padding:1.2rem;margin:1rem 0}
+.frame-label{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:.9rem}
+
+.admin-shell{display:flex;border:0.5px solid var(--border2);border-radius:var(--rl);overflow:hidden;background:var(--bg)}
+.sidebar{width:150px;flex-shrink:0;background:#0d1b2e;display:flex;flex-direction:column}
+.sb-logo{padding:12px 12px 10px;border-bottom:0.5px solid #ffffff12}
+.sb-logo-text{font-size:13px;font-weight:500;color:#fff;letter-spacing:.02em}
+.sb-logo-sub{font-size:9px;color:#ffffff55;font-family:var(--font-mono);margin-top:1px}
+.sb-section{padding:8px 0 2px}
+.sb-section-lbl{font-size:9px;font-family:var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:#ffffff33;padding:0 10px 4px}
+.sb-item{display:flex;align-items:center;gap:6px;padding:6px 10px;font-size:11px;color:#ffffffaa;cursor:pointer;border-right:2px solid transparent}
+.sb-item i{font-size:14px;opacity:.65}
+.sb-item.active{background:#ffffff12;color:#fff;border-right-color:#378ADD}
+.sb-item.active i{opacity:1}
+.main-area{flex:1;min-width:0;display:flex;flex-direction:column;max-height:400px;overflow:auto}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:0.5px solid var(--border);background:var(--bg);flex-shrink:0}
+.topbar-title{font-size:13px;font-weight:500}
+.topbar-actions{display:flex;gap:6px;align-items:center}
+.tb-btn{font-size:10px;font-family:var(--font-mono);padding:4px 10px;border-radius:var(--r);border:0.5px solid var(--border2);color:var(--ink2);cursor:pointer;background:var(--bg2)}
+.tb-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tb-search{font-size:11px;padding:4px 10px;border-radius:var(--r);border:0.5px solid var(--border);color:var(--ink);background:var(--bg2);width:130px}
+.page-content{padding:12px 14px;flex:1}
+
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.kpi{background:var(--bg2);border-radius:var(--r);padding:10px 12px}
+.kpi-val{font-size:20px;font-weight:500;line-height:1}
+.kpi-lbl{font-size:10px;font-family:var(--font-mono);color:var(--ink3);margin-top:4px;letter-spacing:.04em}
+.kpi-delta{font-size:10px;margin-top:3px}
+
+.mini-tbl{width:100%;border-collapse:collapse;font-size:11px;border:0.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.mini-tbl th{background:var(--bg2);font-family:var(--font-mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);padding:6px 10px;text-align:left;border-bottom:0.5px solid var(--border)}
+.mini-tbl td{padding:6px 10px;color:var(--ink2);border-bottom:0.5px solid var(--border)}
+.mini-tbl tr:last-child td{border-bottom:none}
+.mini-tbl tr:hover td{background:var(--bg2)}
+
+.badge{display:inline-flex;align-items:center;font-size:9px;font-family:var(--font-mono);padding:2px 7px;border-radius:3px;font-weight:500;letter-spacing:.03em}
+.b-green{background:var(--success);color:var(--success-t)}
+.b-red{background:var(--danger);color:var(--danger-t)}
+.b-warn{background:var(--warn);color:var(--warn-t)}
+.b-blue{background:var(--info);color:var(--info-t)}
+.b-gray{background:var(--bg2);color:var(--ink3);border:0.5px solid var(--border)}
+
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:1rem 0}
+.spec-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem 1.1rem}
+.spec-card-title{font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;margin-bottom:.6rem}
+.spec-card-title i{font-size:16px;color:var(--ink3)}
+.spec-list{font-size:12px;color:var(--ink2);line-height:2}
+.spec-list span{display:block}
+
+.field-row{display:flex;align-items:baseline;gap:10px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px}
+.field-row:last-child{border-bottom:none}
+.field-name{font-family:var(--font-mono);font-size:11px;color:var(--ink);min-width:140px;flex-shrink:0}
+.field-type{font-size:10px;color:var(--ink3);font-family:var(--font-mono);min-width:60px}
+.field-desc{color:var(--ink2);flex:1}
+.field-req{font-size:9px;padding:1px 5px;border-radius:2px;flex-shrink:0}
+
+.flow-steps{margin:1rem 0}
+.flow-step{display:flex;gap:12px;margin-bottom:6px}
+.step-dot{width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-family:var(--font-mono);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-body .step-t{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:1px}
+.step-body .step-d{font-size:11px;color:var(--ink3)}
+
+.module-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:1rem 0}
+.module-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--rl);padding:.9rem 1rem;cursor:pointer;transition:border-color .15s}
+.module-card:hover{border-color:var(--border2)}
+.mc-icon{font-size:20px;color:var(--ink3);margin-bottom:6px}
+.mc-name{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.mc-desc{font-size:11px;color:var(--ink3);line-height:1.5}
+
+.perm-table{width:100%;border-collapse:collapse;font-size:11px;margin:1rem 0}
+.perm-table th{background:var(--bg2);font-family:var(--font-mono);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);padding:6px 10px;text-align:left;border-bottom:0.5px solid var(--border);border-right:0.5px solid var(--border)}
+.perm-table td{padding:6px 10px;border-bottom:0.5px solid var(--border);border-right:0.5px solid var(--border);color:var(--ink2)}
+.perm-table td:last-child,.perm-table th:last-child{border-right:none}
+.perm-table tr:last-child td{border-bottom:none}
+.tick{color:var(--success-t);font-size:14px}
+.cross{color:var(--ink3);font-size:14px}
+
+.callout{background:var(--bg2);border-left:2px solid var(--accent);padding:10px 14px;border-radius:0 var(--r) var(--r) 0;margin:1rem 0;font-size:12px;color:var(--ink2);line-height:1.6}
+.callout strong{color:var(--ink)}
+
+.nav-map{border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin:1rem 0}
+.nav-row{display:flex;align-items:stretch;border-bottom:0.5px solid var(--border)}
+.nav-row:last-child{border-bottom:none}
+.nav-module{width:160px;flex-shrink:0;padding:10px 14px;background:var(--bg2);border-right:0.5px solid var(--border);display:flex;align-items:center;gap:8px}
+.nav-module i{font-size:16px;color:var(--ink3)}
+.nav-module-name{font-size:12px;font-weight:500;color:var(--ink)}
+.nav-pages{padding:8px 14px;display:flex;flex-wrap:wrap;gap:5px;align-items:center;flex:1}
+.nav-page{font-size:11px;background:var(--bg);border:0.5px solid var(--border);border-radius:3px;padding:3px 8px;color:var(--ink2)}
+
+.api-row{display:grid;grid-template-columns:90px 200px 1fr;gap:0;border-bottom:0.5px solid var(--border);font-size:11px}
+.api-row:last-child{border-bottom:none}
+.api-method{padding:6px 10px;font-family:var(--font-mono);font-size:10px;font-weight:500;display:flex;align-items:center}
+.api-method.get{color:#0F6E56}
+.api-method.post{color:#185FA5}
+.api-method.put{color:#854F0B}
+.api-method.delete{color:#A32D2D}
+.api-path{padding:6px 10px;font-family:var(--font-mono);font-size:10px;color:var(--ink);border-left:0.5px solid var(--border);border-right:0.5px solid var(--border)}
+.api-desc{padding:6px 10px;color:var(--ink2)}
+
+h4{font-size:13px;font-weight:500;color:var(--ink);margin:1.2rem 0 .5rem}
+h4:first-child{margin-top:0}
+</style>
+
+<div class="doc">
+
+<div class="cover">
+  <div class="cover-eyebrow">Admin Panel · Product Requirements Document</div>
+  <div class="cover-title">HAMS Web Admin Panel<br><span>Screen-by-Screen Specification</span></div>
+  <div class="cover-desc">Complete UI/UX and feature specification for the Next.js React admin panel — 14 screens, all modules, field-level detail, permission matrix, and API contract for the Hospital Attendance Management System.</div>
+  <div class="cover-chips">
+    <span class="chip blue">Next.js 14</span>
+    <span class="chip blue">React + TypeScript</span>
+    <span class="chip">14 Screens</span>
+    <span class="chip">4 Roles</span>
+    <span class="chip">REST + SignalR</span>
+    <span class="chip">Responsive</span>
+  </div>
+</div>
+
+<div class="toc">
+  <div class="toc-title">Screens & Modules</div>
+  <div class="toc-grid">
+    <div class="toc-row" onclick="document.getElementById('s1').scrollIntoView({behavior:'smooth'})"><span class="toc-n">01</span><span class="toc-lbl">Layout & Navigation</span></div>
+    <div class="toc-row" onclick="document.getElementById('s2').scrollIntoView({behavior:'smooth'})"><span class="toc-n">02</span><span class="toc-lbl">Dashboard</span></div>
+    <div class="toc-row" onclick="document.getElementById('s3').scrollIntoView({behavior:'smooth'})"><span class="toc-n">03</span><span class="toc-lbl">Live Monitor</span></div>
+    <div class="toc-row" onclick="document.getElementById('s4').scrollIntoView({behavior:'smooth'})"><span class="toc-n">04</span><span class="toc-lbl">Staff Management</span></div>
+    <div class="toc-row" onclick="document.getElementById('s5').scrollIntoView({behavior:'smooth'})"><span class="toc-n">05</span><span class="toc-lbl">Attendance Records</span></div>
+    <div class="toc-row" onclick="document.getElementById('s6').scrollIntoView({behavior:'smooth'})"><span class="toc-n">06</span><span class="toc-lbl">Attendance Corrections</span></div>
+    <div class="toc-row" onclick="document.getElementById('s7').scrollIntoView({behavior:'smooth'})"><span class="toc-n">07</span><span class="toc-lbl">Shift Management</span></div>
+    <div class="toc-row" onclick="document.getElementById('s8').scrollIntoView({behavior:'smooth'})"><span class="toc-n">08</span><span class="toc-lbl">Department Management</span></div>
+    <div class="toc-row" onclick="document.getElementById('s9').scrollIntoView({behavior:'smooth'})"><span class="toc-n">09</span><span class="toc-lbl">Leave Management</span></div>
+    <div class="toc-row" onclick="document.getElementById('s10').scrollIntoView({behavior:'smooth'})"><span class="toc-n">10</span><span class="toc-lbl">Reports</span></div>
+    <div class="toc-row" onclick="document.getElementById('s11').scrollIntoView({behavior:'smooth'})"><span class="toc-n">11</span><span class="toc-lbl">Payroll Export</span></div>
+    <div class="toc-row" onclick="document.getElementById('s12').scrollIntoView({behavior:'smooth'})"><span class="toc-n">12</span><span class="toc-lbl">Audit Logs</span></div>
+    <div class="toc-row" onclick="document.getElementById('s13').scrollIntoView({behavior:'smooth'})"><span class="toc-n">13</span><span class="toc-lbl">Settings</span></div>
+    <div class="toc-row" onclick="document.getElementById('s14').scrollIntoView({behavior:'smooth'})"><span class="toc-n">14</span><span class="toc-lbl">Permission Matrix & API</span></div>
+  </div>
+</div>
+
+<!-- S1: LAYOUT -->
+<div class="section" id="s1">
+  <div class="sec-hdr"><span class="sec-n">01</span><span class="sec-title">Layout & Navigation</span><span class="sec-tag tag-blue">SHELL</span></div>
+  <p class="prose">The shell is a fixed left sidebar + sticky top header + scrollable main content area. All 14 modules live in the sidebar. The layout never changes — only the main content area swaps.</p>
+
+  <div class="screen-frame">
+    <div class="frame-label">Admin shell — sidebar collapsed view</div>
+    <div class="admin-shell">
+      <div class="sidebar">
+        <div class="sb-logo"><div class="sb-logo-text">HAMS</div><div class="sb-logo-sub">Divyam Hospital</div></div>
+        <div class="sb-section">
+          <div class="sb-section-lbl">Main</div>
+          <div class="sb-item active"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard</div>
+          <div class="sb-item"><i class="ti ti-activity" aria-hidden="true"></i> Live Monitor</div>
+          <div class="sb-item"><i class="ti ti-users" aria-hidden="true"></i> Staff</div>
+          <div class="sb-item"><i class="ti ti-clock" aria-hidden="true"></i> Attendance</div>
+          <div class="sb-item"><i class="ti ti-edit" aria-hidden="true"></i> Corrections</div>
+        </div>
+        <div class="sb-section">
+          <div class="sb-section-lbl">Config</div>
+          <div class="sb-item"><i class="ti ti-calendar-time" aria-hidden="true"></i> Shifts</div>
+          <div class="sb-item"><i class="ti ti-building" aria-hidden="true"></i> Departments</div>
+          <div class="sb-item"><i class="ti ti-beach" aria-hidden="true"></i> Leave</div>
+        </div>
+        <div class="sb-section">
+          <div class="sb-section-lbl">Output</div>
+          <div class="sb-item"><i class="ti ti-file-analytics" aria-hidden="true"></i> Reports</div>
+          <div class="sb-item"><i class="ti ti-coin" aria-hidden="true"></i> Payroll</div>
+          <div class="sb-item"><i class="ti ti-list-search" aria-hidden="true"></i> Audit Logs</div>
+          <div class="sb-item"><i class="ti ti-settings" aria-hidden="true"></i> Settings</div>
+        </div>
+      </div>
+      <div class="main-area">
+        <div class="topbar">
+          <div class="topbar-title">Dashboard — Jun 14, 2026</div>
+          <div class="topbar-actions">
+            <input class="tb-search" placeholder="Search staff..." />
+            <div class="tb-btn"><i class="ti ti-bell" aria-hidden="true"></i></div>
+            <div class="tb-btn">Dr. Vikash ▾</div>
+          </div>
+        </div>
+        <div class="page-content">
+          <div class="kpi-row">
+            <div class="kpi"><div class="kpi-val">120</div><div class="kpi-lbl">Total Staff</div></div>
+            <div class="kpi"><div class="kpi-val" style="color:var(--success-t)">95</div><div class="kpi-lbl">Present</div><div class="kpi-delta" style="color:var(--success-t)">79%</div></div>
+            <div class="kpi"><div class="kpi-val" style="color:var(--danger-t)">15</div><div class="kpi-lbl">Absent</div></div>
+            <div class="kpi"><div class="kpi-val" style="color:var(--warn-t)">8</div><div class="kpi-lbl">Late Today</div></div>
+          </div>
+          <table class="mini-tbl">
+            <tr><th>Employee</th><th>Dept</th><th>Check In</th><th>Status</th></tr>
+            <tr><td>Raj Sharma</td><td>OPD</td><td>08:58</td><td><span class="badge b-green">Working</span></td></tr>
+            <tr><td>Neha Singh</td><td>ICU</td><td>07:05</td><td><span class="badge b-blue">On Break</span></td></tr>
+            <tr><td>Amit Gupta</td><td>Lab</td><td>09:22</td><td><span class="badge b-warn">Late</span></td></tr>
+            <tr><td>Pooja Mehta</td><td>Pharmacy</td><td>—</td><td><span class="badge b-red">Absent</span></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h4>Navigation map</h4>
+  <div class="nav-map">
+    <div class="nav-row"><div class="nav-module"><i class="ti ti-layout-dashboard" aria-hidden="true"></i><span class="nav-module-name">Dashboard</span></div><div class="nav-pages"><span class="nav-page">Overview</span><span class="nav-page">Daily summary</span><span class="nav-page">Charts</span><span class="nav-page">Leave queue</span></div></div>
+    <div class="nav-row"><div class="nav-module"><i class="ti ti-activity" aria-hidden="true"></i><span class="nav-module-name">Live Monitor</span></div><div class="nav-pages"><span class="nav-page">Real-time table</span><span class="nav-page">Dept filter</span><span class="nav-page">Location map</span></div></div>
+    <div class="nav-row"><div class="nav-module"><i class="ti ti-users" aria-hidden="true"></i><span class="nav-module-name">Staff</span></div><div class="nav-pages"><span class="nav-page">Employee list</span><span class="nav-page">Add employee</span><span class="nav-page">Employee profile</span><span class="nav-page">Face enroll</span></div></div>
+    <div class="nav-row"><div class="nav-module"><i class="ti ti-clock" aria-hidden="true"></i><span class="nav-module-name">Attendance</span></div><div class="nav-pages"><span class="nav-page">Records table</span><span class="nav-page">Daily view</span><span class="nav-page">Monthly calendar</span><span class="nav-page">Break log</span></div></div>
+    <div class="nav-row"><div class="nav-module"><i class="ti ti-edit" aria-hidden="true"></i><span class="nav-module-name">Corrections</span></div><div class="nav-pages"><span class="nav-page">Pending requests</span><span class="nav-page">Approve / reject</span><span class="nav-page">History</span></div></div>
+    <div class="nav-row"><div class="nav-module"><i class="ti ti-calendar-time" aria-hidden="true"></i><span class="nav-module-name">Shifts</span></div><div class="nav-pages"><span class="nav-page">Shift list</span><span class="nav-page">Create shift</span><span class="nav-page">Assign staff</span></div></div>
+    <div class="nav-row"><div class="nav-module"><i class="ti ti-file-analytics" aria-hidden="true"></i><span class="nav-module-name">Reports</span></div><div class="nav-pages"><span class="nav-page">Daily report</span><span class="nav-page">Monthly report</span><span class="nav-page">Dept report</span><span class="nav-page">OT report</span><span class="nav-page">Export</span></div></div>
+    <div class="nav-row"><div class="nav-module"><i class="ti ti-settings" aria-hidden="true"></i><span class="nav-module-name">Settings</span></div><div class="nav-pages"><span class="nav-page">Hospital info</span><span class="nav-page">Geo-fence</span><span class="nav-page">Face threshold</span><span class="nav-page">Notifications</span><span class="nav-page">Holidays</span></div></div>
+  </div>
+
+  <div class="callout"><strong>Route pattern:</strong> All routes under <code>/admin/[module]</code>. Dynamic pages use <code>/admin/staff/[id]</code>, <code>/admin/attendance/[date]</code> etc. Auth guard redirects unauthenticated users to <code>/login</code>. Role guard hides modules not permitted for current user.</div>
+</div>
+
+<!-- S2: DASHBOARD -->
+<div class="section" id="s2">
+  <div class="sec-hdr"><span class="sec-n">02</span><span class="sec-title">Dashboard</span><span class="sec-tag tag-blue">SCREEN</span></div>
+  <p class="prose">The first screen after login. Auto-refreshes every 60 seconds. Shows the current day's summary by default with date-range override.</p>
+
+  <div class="spec-grid">
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> KPI widgets (row 1)</div>
+      <div class="spec-list">
+        <span>Total Staff (count)</span>
+        <span>Present Today (count + %)</span>
+        <span>Absent Today (count)</span>
+        <span>Late Today (count)</span>
+        <span>On Break Now (count)</span>
+        <span>Checked Out (count)</span>
+        <span>On Leave (count)</span>
+        <span>Pending Corrections (count)</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-chart-line" aria-hidden="true"></i> Charts (row 2)</div>
+      <div class="spec-list">
+        <span>Weekly attendance trend (line)</span>
+        <span>Dept-wise attendance % (bar)</span>
+        <span>Check-in time distribution (histogram)</span>
+        <span>Monthly summary (stacked bar)</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-bell" aria-hidden="true"></i> Alert feed (right column)</div>
+      <div class="spec-list">
+        <span>Late arrivals (real-time)</span>
+        <span>Break violations today</span>
+        <span>Pending leave requests</span>
+        <span>Pending correction requests</span>
+        <span>Absent without leave</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-table" aria-hidden="true"></i> Recent activity table</div>
+      <div class="spec-list">
+        <span>Last 10 check-ins with face score</span>
+        <span>Filter by department</span>
+        <span>Click row → staff profile</span>
+        <span>Export current view as CSV</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S3: LIVE MONITOR -->
+<div class="section" id="s3">
+  <div class="sec-hdr"><span class="sec-n">03</span><span class="sec-title">Live Monitor</span><span class="sec-tag tag-green">REAL-TIME</span></div>
+  <p class="prose">Real-time staff tracking via SignalR WebSocket. Table auto-updates without page refresh. Shows every employee's current status at a glance.</p>
+
+  <div class="screen-frame">
+    <div class="frame-label">Live monitor — attendance table</div>
+    <div class="admin-shell">
+      <div class="sidebar" style="width:120px">
+        <div class="sb-logo"><div class="sb-logo-text">HAMS</div></div>
+        <div class="sb-section">
+          <div class="sb-item"><i class="ti ti-layout-dashboard" aria-hidden="true"></i> Dashboard</div>
+          <div class="sb-item active"><i class="ti ti-activity" aria-hidden="true"></i> Live</div>
+          <div class="sb-item"><i class="ti ti-users" aria-hidden="true"></i> Staff</div>
+        </div>
+      </div>
+      <div class="main-area">
+        <div class="topbar">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:7px;height:7px;border-radius:50%;background:var(--success-t)"></div>
+            <div class="topbar-title">Live Monitor</div>
+            <span style="font-size:10px;color:var(--ink3);font-family:var(--font-mono)">95 active · updated 3s ago</span>
+          </div>
+          <div class="topbar-actions">
+            <select style="font-size:11px;border:0.5px solid var(--border);border-radius:var(--r);padding:4px 8px;color:var(--ink2);background:var(--bg2)"><option>All Departments</option></select>
+            <select style="font-size:11px;border:0.5px solid var(--border);border-radius:var(--r);padding:4px 8px;color:var(--ink2);background:var(--bg2)"><option>All Shifts</option></select>
+          </div>
+        </div>
+        <div class="page-content">
+          <table class="mini-tbl" style="table-layout:fixed">
+            <tr><th style="width:110px">Employee</th><th style="width:70px">Dept</th><th style="width:60px">Shift</th><th style="width:55px">Check In</th><th style="width:70px">Break</th><th style="width:80px">Status</th><th style="width:55px">Hrs</th></tr>
+            <tr><td>Raj Sharma</td><td>OPD</td><td>General</td><td>08:58</td><td>—</td><td><span class="badge b-green">Working</span></td><td>4h 12m</td></tr>
+            <tr><td>Neha Singh</td><td>ICU</td><td>Morning</td><td>07:05</td><td>Lunch 22m</td><td><span class="badge b-blue">On Break</span></td><td>6h 03m</td></tr>
+            <tr><td>Amit Gupta</td><td>Lab</td><td>General</td><td>09:22</td><td>—</td><td><span class="badge b-warn">Late +22m</span></td><td>3h 48m</td></tr>
+            <tr><td>Pooja Mehta</td><td>Pharmacy</td><td>General</td><td>—</td><td>—</td><td><span class="badge b-red">Absent</span></td><td>—</td></tr>
+            <tr><td>Ravi Verma</td><td>ICU</td><td>Morning</td><td>07:00</td><td>—</td><td><span class="badge b-gray">Checked Out</span></td><td>7h 55m</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec-grid" style="margin-top:1rem">
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-filter" aria-hidden="true"></i> Filter controls</div>
+      <div class="spec-list">
+        <span>Department dropdown (multi-select)</span>
+        <span>Shift dropdown</span>
+        <span>Status filter (Working / Break / Absent...)</span>
+        <span>Text search by name / ID</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-map-pin" aria-hidden="true"></i> Location panel</div>
+      <div class="spec-list">
+        <span>Google Maps embed showing geo-fence circle</span>
+        <span>Each checked-in staff as map pin</span>
+        <span>Click pin → staff quick view</span>
+        <span>Outside-fence check-ins highlighted red</span>
+      </div>
+    </div>
+  </div>
+  <div class="callout"><strong>WebSocket:</strong> SignalR hub at <code>/hubs/attendance</code>. Client subscribes to <code>OnAttendanceUpdate</code> and <code>OnBreakUpdate</code> events. Table row flashes briefly on status change. Fallback: polling every 30s if WS unavailable.</div>
+</div>
+
+<!-- S4: STAFF MANAGEMENT -->
+<div class="section" id="s4">
+  <div class="sec-hdr"><span class="sec-n">04</span><span class="sec-title">Staff Management</span><span class="sec-tag tag-blue">SCREEN</span></div>
+  <p class="prose">Full CRUD for employees. Face template enrollment happens here. Device binding is managed per employee.</p>
+
+  <h4>Employee list page columns</h4>
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin:.5rem 0">
+    <table class="mini-tbl">
+      <tr><th>Photo</th><th>Name</th><th>ID</th><th>Department</th><th>Shift</th><th>Face</th><th>Device</th><th>Status</th><th>Actions</th></tr>
+      <tr><td><div style="width:26px;height:26px;border-radius:50%;background:var(--info);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--info-t);font-weight:500">RS</div></td><td>Raj Sharma</td><td>DVH-042</td><td>OPD</td><td>General</td><td><span class="badge b-green">Enrolled</span></td><td><span class="badge b-green">Bound</span></td><td><span class="badge b-green">Active</span></td><td style="color:var(--info-t);font-size:11px">Edit · View</td></tr>
+      <tr><td><div style="width:26px;height:26px;border-radius:50%;background:var(--warn);display:flex;align-items:center;justify-content:circle;font-size:10px;color:var(--warn-t);font-weight:500;justify-content:center">PM</div></td><td>Pooja Mehta</td><td>DVH-078</td><td>Pharmacy</td><td>General</td><td><span class="badge b-warn">Pending</span></td><td><span class="badge b-gray">Unbound</span></td><td><span class="badge b-green">Active</span></td><td style="color:var(--info-t);font-size:11px">Edit · Enroll</td></tr>
+    </table>
+  </div>
+
+  <h4>Add / Edit employee — form fields</h4>
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin:.5rem 0">
+    <div class="field-row"><span class="field-name">employee_code</span><span class="field-type">TEXT</span><span class="field-desc">Auto-generated (DVH-XXX) or manual override</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">full_name</span><span class="field-type">TEXT</span><span class="field-desc">Full legal name as on ID</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">mobile</span><span class="field-type">TEXT</span><span class="field-desc">10-digit, used for WhatsApp alerts</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">email</span><span class="field-type">TEXT</span><span class="field-desc">Work email, used for report delivery</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">department_id</span><span class="field-type">SELECT</span><span class="field-desc">Dropdown from departments table</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">designation</span><span class="field-type">TEXT</span><span class="field-desc">Doctor / Nurse / Receptionist / Lab Tech etc.</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">shift_id</span><span class="field-type">SELECT</span><span class="field-desc">Primary shift assignment</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">joining_date</span><span class="field-type">DATE</span><span class="field-desc">Date of joining (affects leave balance)</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">photo</span><span class="field-type">IMAGE</span><span class="field-desc">Profile photo, max 2MB, JPG/PNG</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">face_template</span><span class="field-type">BIOMETRIC</span><span class="field-desc">Enrolled via Face Enrollment wizard (separate flow)</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">device_id</span><span class="field-type">TEXT</span><span class="field-desc">Auto-bound on first app login. Admin can reset.</span><span class="field-req b-gray badge">Auto</span></div>
+    <div class="field-row"><span class="field-name">weekly_off</span><span class="field-type">MULTI-SELECT</span><span class="field-desc">Days off — overrides shift default if set</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">is_active</span><span class="field-type">TOGGLE</span><span class="field-desc">Inactive employees cannot check in</span><span class="field-req b-green badge">Required</span></div>
+  </div>
+
+  <h4>Face enrollment wizard (3 steps)</h4>
+  <div class="flow-steps">
+    <div class="flow-step"><div class="step-dot">1</div><div class="step-body"><div class="step-t">Open webcam panel</div><div class="step-d">Admin opens enrollment modal. Webcam activates via browser API. Instructions shown to employee.</div></div></div>
+    <div class="flow-step"><div class="step-dot">2</div><div class="step-body"><div class="step-t">Capture 5 frames</div><div class="step-d">System captures 5 photos at different angles. Each frame validated for face detection and liveness signals.</div></div></div>
+    <div class="flow-step"><div class="step-dot">3</div><div class="step-body"><div class="step-t">Generate & store template</div><div class="step-d">ArcFace embedding generated server-side. Template stored encrypted. Match score preview shown. Status → Enrolled.</div></div></div>
+  </div>
+</div>
+
+<!-- S5: ATTENDANCE RECORDS -->
+<div class="section" id="s5">
+  <div class="sec-hdr"><span class="sec-n">05</span><span class="sec-title">Attendance Records</span><span class="sec-tag tag-blue">SCREEN</span></div>
+  <p class="prose">Central attendance log. All punches, breaks, statuses, and computed hours. Filterable and exportable. Inline editing with mandatory audit note.</p>
+
+  <h4>Filter bar</h4>
+  <div class="spec-card" style="margin:.5rem 0">
+    <div class="spec-list" style="display:flex;flex-wrap:wrap;gap:6px;line-height:1">
+      <span class="nav-page">Date range picker</span>
+      <span class="nav-page">Employee search</span>
+      <span class="nav-page">Department</span>
+      <span class="nav-page">Shift</span>
+      <span class="nav-page">Status (Present/Absent/Late/Half Day/On Leave)</span>
+      <span class="nav-page">Branch</span>
+      <span class="nav-page">Reset all</span>
+    </div>
+  </div>
+
+  <h4>Table columns</h4>
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin:.5rem 0">
+    <table class="mini-tbl" style="table-layout:fixed">
+      <tr><th style="width:65px">Date</th><th style="width:95px">Employee</th><th style="width:55px">Check In</th><th style="width:55px">Check Out</th><th style="width:60px">Break</th><th style="width:60px">Work Hrs</th><th style="width:55px">Late</th><th style="width:40px">OT</th><th style="width:70px">Status</th><th style="width:40px">Edit</th></tr>
+      <tr><td>14 Jun</td><td>Raj Sharma</td><td>08:58</td><td>17:10</td><td>62 min</td><td>7h 10m</td><td>—</td><td>10m</td><td><span class="badge b-green">Present</span></td><td style="color:var(--info-t)"><i class="ti ti-edit" style="font-size:13px" aria-hidden="true"></i></td></tr>
+      <tr><td>14 Jun</td><td>Amit Gupta</td><td>09:22</td><td>17:05</td><td>58 min</td><td>6h 45m</td><td>22 min</td><td>—</td><td><span class="badge b-warn">Late</span></td><td style="color:var(--info-t)"><i class="ti ti-edit" style="font-size:13px" aria-hidden="true"></i></td></tr>
+      <tr><td>14 Jun</td><td>Pooja Mehta</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="badge b-red">Absent</span></td><td style="color:var(--info-t)"><i class="ti ti-edit" style="font-size:13px" aria-hidden="true"></i></td></tr>
+    </table>
+  </div>
+
+  <h4>Inline edit rules</h4>
+  <div class="callout"><strong>Any manual edit requires:</strong> Reason (text field, min 20 chars) + HR password re-confirm. Edit is saved with <code>edited_by</code>, <code>edited_at</code>, and <code>edit_reason</code> written to AuditLogs. Original value preserved in <code>original_value</code> column. Edits visible to Super Admin only in audit view.</div>
+
+  <h4>Break log sub-view</h4>
+  <p class="prose">Click any row to expand a break log showing all break events for that attendance record: break type, start, end, duration, violation flag.</p>
+</div>
+
+<!-- S6: CORRECTIONS -->
+<div class="section" id="s6">
+  <div class="sec-hdr"><span class="sec-n">06</span><span class="sec-title">Attendance Corrections</span><span class="sec-tag tag-warn">WORKFLOW</span></div>
+  <p class="prose">Two-stage approval workflow. Employee submits via app. Manager reviews, HR finalizes. Full audit trail.</p>
+
+  <h4>Correction request types</h4>
+  <div class="spec-grid">
+    <div class="spec-card"><div class="spec-card-title"><i class="ti ti-login" aria-hidden="true"></i> Forgot check-in</div><div class="spec-list"><span>Employee provides reason</span><span>Requested check-in time</span><span>Supporting photo (optional)</span></div></div>
+    <div class="spec-card"><div class="spec-card-title"><i class="ti ti-logout" aria-hidden="true"></i> Forgot check-out</div><div class="spec-list"><span>Employee provides reason</span><span>Requested check-out time</span><span>Manager can verify via CCTV note</span></div></div>
+    <div class="spec-card"><div class="spec-card-title"><i class="ti ti-map-pin-off" aria-hidden="true"></i> Location issue</div><div class="spec-list"><span>GPS failed / network error</span><span>Employee-provided coordinates</span><span>Admin verifies manually</span></div></div>
+    <div class="spec-card"><div class="spec-card-title"><i class="ti ti-alert-circle" aria-hidden="true"></i> Wrong status</div><div class="spec-list"><span>System marked incorrectly</span><span>Correct status requested</span><span>HR-only approval</span></div></div>
+  </div>
+
+  <h4>Approval workflow</h4>
+  <div class="flow-steps">
+    <div class="flow-step"><div class="step-dot">1</div><div class="step-body"><div class="step-t">Employee submits via app</div><div class="step-d">Request logged with timestamp, request type, reason, requested value. Status → Pending.</div></div></div>
+    <div class="flow-step"><div class="step-dot">2</div><div class="step-body"><div class="step-t">Dept Head review (optional)</div><div class="step-d">If configured, dept head gets notified. They can approve/reject/comment. Status → Dept Approved.</div></div></div>
+    <div class="flow-step"><div class="step-dot">3</div><div class="step-body"><div class="step-t">HR / Super Admin final approval</div><div class="step-d">HR sees approved corrections queue. Reviews + approves → attendance record updated. Status → Resolved. Audit log entry created.</div></div></div>
+  </div>
+</div>
+
+<!-- S7: SHIFTS -->
+<div class="section" id="s7">
+  <div class="sec-hdr"><span class="sec-n">07</span><span class="sec-title">Shift Management</span><span class="sec-tag tag-blue">SCREEN</span></div>
+  <p class="prose">Unlimited named shifts. Each shift carries its own rules. Assigned to departments or individual employees.</p>
+
+  <h4>Create / Edit shift — form fields</h4>
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin:.5rem 0">
+    <div class="field-row"><span class="field-name">shift_name</span><span class="field-type">TEXT</span><span class="field-desc">e.g. Morning Shift, Night Duty</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">start_time</span><span class="field-type">TIME</span><span class="field-desc">HH:MM (24h). Supports overnight shifts (e.g. 22:00 → 06:00)</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">end_time</span><span class="field-type">TIME</span><span class="field-desc">If end_time &lt; start_time, shift spans midnight</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">grace_minutes</span><span class="field-type">NUMBER</span><span class="field-desc">Minutes of buffer before "Late" is marked (default 10)</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">half_day_threshold</span><span class="field-type">TIME</span><span class="field-desc">Arrival after this time → Half Day</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">early_leave_buffer</span><span class="field-type">NUMBER</span><span class="field-desc">Minutes before shift end allowed without Early Leave flag</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">total_break_limit_min</span><span class="field-type">NUMBER</span><span class="field-desc">Max total break minutes per day (default 90)</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">ot_threshold_min</span><span class="field-type">NUMBER</span><span class="field-desc">Minutes after shift end before OT counts (default 30)</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">weekly_off</span><span class="field-type">CHECKBOXES</span><span class="field-desc">Default weekly off days for this shift</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">applicable_departments</span><span class="field-type">MULTI-SELECT</span><span class="field-desc">Pre-assign shift to these departments</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">color</span><span class="field-type">COLOR</span><span class="field-desc">Used in calendar and dashboard color coding</span><span class="field-req b-gray badge">Optional</span></div>
+  </div>
+</div>
+
+<!-- S8: DEPARTMENTS -->
+<div class="section" id="s8">
+  <div class="sec-hdr"><span class="sec-n">08</span><span class="sec-title">Department Management</span><span class="sec-tag tag-blue">SCREEN</span></div>
+  <p class="prose">Manage hospital departments (OPD, IPD, ICU, Lab, Pharmacy, OT, Accounts etc.). Each department has a head, default shift, and geo-fence override.</p>
+
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin:.5rem 0">
+    <div class="field-row"><span class="field-name">department_name</span><span class="field-type">TEXT</span><span class="field-desc">e.g. ICU, OPD, Pharmacy</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">dept_code</span><span class="field-type">TEXT</span><span class="field-desc">Short code for reports (ICU, OPD, LAB...)</span><span class="field-req b-green badge">Required</span></div>
+    <div class="field-row"><span class="field-name">department_head_id</span><span class="field-type">SELECT</span><span class="field-desc">Employee assigned as head — gets correction approval rights</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">default_shift_id</span><span class="field-type">SELECT</span><span class="field-desc">Default shift for new employees in this dept</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">geo_fence_override_m</span><span class="field-type">NUMBER</span><span class="field-desc">Override global geo-fence radius for this dept (e.g. OT staff in separate wing)</span><span class="field-req b-gray badge">Optional</span></div>
+    <div class="field-row"><span class="field-name">floor_wing</span><span class="field-type">TEXT</span><span class="field-desc">Floor/wing descriptor shown in live monitor</span><span class="field-req b-gray badge">Optional</span></div>
+  </div>
+</div>
+
+<!-- S9: LEAVE -->
+<div class="section" id="s9">
+  <div class="sec-hdr"><span class="sec-n">09</span><span class="sec-title">Leave Management</span><span class="sec-tag tag-warn">WORKFLOW</span></div>
+  <p class="prose">Configure leave types, review and approve requests, track balance per employee. Leave approved here automatically marks attendance as "On Leave" for those dates.</p>
+
+  <div class="spec-grid">
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-list" aria-hidden="true"></i> Leave types config</div>
+      <div class="spec-list">
+        <span>Casual Leave (CL) — default 12/year</span>
+        <span>Sick Leave (SL) — default 12/year</span>
+        <span>Earned Leave (EL) — accrues monthly</span>
+        <span>Emergency Leave — admin-approved only</span>
+        <span>Maternity / Paternity Leave</span>
+        <span>Custom leave types (add/edit)</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-calendar-check" aria-hidden="true"></i> Request queue</div>
+      <div class="spec-list">
+        <span>Pending requests list with dates + reason</span>
+        <span>Approve with optional note</span>
+        <span>Reject with mandatory reason</span>
+        <span>Employee notified via FCM + WhatsApp</span>
+        <span>Balance auto-deducted on approval</span>
+        <span>View past leave history per employee</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-chart-bar" aria-hidden="true"></i> Leave balance view</div>
+      <div class="spec-list">
+        <span>Per-employee leave balance table</span>
+        <span>Used / Remaining / Total for each type</span>
+        <span>Manual balance adjustment (HR only)</span>
+        <span>Year rollover settings</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-calendar" aria-hidden="true"></i> Leave calendar</div>
+      <div class="spec-list">
+        <span>Monthly calendar view</span>
+        <span>Color-coded by leave type</span>
+        <span>Dept filter to see coverage gaps</span>
+        <span>Clash detection (too many absent same day)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S10: REPORTS -->
+<div class="section" id="s10">
+  <div class="sec-hdr"><span class="sec-n">10</span><span class="sec-title">Reports</span><span class="sec-tag tag-blue">SCREEN</span></div>
+  <p class="prose">Seven report types. All generated server-side. PDF rendered by QuestPDF, Excel by ClosedXML. Large reports queued as background jobs (Hangfire); download link sent via email when ready.</p>
+
+  <div class="module-grid">
+    <div class="module-card" onclick="sendPrompt('Generate the daily attendance report specification')">
+      <div class="mc-icon"><i class="ti ti-calendar-day" aria-hidden="true"></i></div>
+      <div class="mc-name">Daily attendance</div>
+      <div class="mc-desc">All staff for one date. Present / absent / late / break violations. PDF or Excel. ↗</div>
+    </div>
+    <div class="module-card" onclick="sendPrompt('Generate the monthly staff report specification')">
+      <div class="mc-icon"><i class="ti ti-calendar-month" aria-hidden="true"></i></div>
+      <div class="mc-name">Monthly staff report</div>
+      <div class="mc-desc">Per-employee summary for a month. Days present, absent, late, OT hours. ↗</div>
+    </div>
+    <div class="module-card" onclick="sendPrompt('Generate the department report specification')">
+      <div class="mc-icon"><i class="ti ti-building" aria-hidden="true"></i></div>
+      <div class="mc-name">Department report</div>
+      <div class="mc-desc">Attendance % by dept, late analysis, staff utilization chart. ↗</div>
+    </div>
+    <div class="module-card" onclick="sendPrompt('Generate the late arrivals report specification')">
+      <div class="mc-icon"><i class="ti ti-clock-exclamation" aria-hidden="true"></i></div>
+      <div class="mc-name">Late arrivals</div>
+      <div class="mc-desc">All late punches in date range with minutes late and frequency ranking. ↗</div>
+    </div>
+    <div class="module-card" onclick="sendPrompt('Generate the overtime report specification')">
+      <div class="mc-icon"><i class="ti ti-clock-plus" aria-hidden="true"></i></div>
+      <div class="mc-name">Overtime report</div>
+      <div class="mc-desc">OT hours per employee, OT cost estimate based on salary config. ↗</div>
+    </div>
+    <div class="module-card" onclick="sendPrompt('Generate the break violation report specification')">
+      <div class="mc-icon"><i class="ti ti-coffee-off" aria-hidden="true"></i></div>
+      <div class="mc-name">Break violations</div>
+      <div class="mc-desc">Employees exceeding break limits, total excess time, deduction impact. ↗</div>
+    </div>
+    <div class="module-card" onclick="sendPrompt('Generate the leave summary report specification')">
+      <div class="mc-icon"><i class="ti ti-beach" aria-hidden="true"></i></div>
+      <div class="mc-name">Leave summary</div>
+      <div class="mc-desc">Leave taken per type per employee, balance remaining, encashment eligible. ↗</div>
+    </div>
+  </div>
+
+  <div class="callout"><strong>Scheduled reports:</strong> Admin can configure daily / weekly / monthly reports to auto-generate and email to configured recipients. Hangfire cron job, configurable from Settings &gt; Reports.</div>
+</div>
+
+<!-- S11: PAYROLL -->
+<div class="section" id="s11">
+  <div class="sec-hdr"><span class="sec-n">11</span><span class="sec-title">Payroll Export</span><span class="sec-tag tag-green">SCREEN</span></div>
+  <p class="prose">Not a full payroll system — an attendance-to-payroll bridge. Generates the attendance data file that salary software (Tally, HR portal, custom) consumes.</p>
+
+  <h4>Computed fields per employee per month</h4>
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);padding:1rem;margin:.5rem 0">
+    <div class="field-row"><span class="field-name">working_days</span><span class="field-type">NUMBER</span><span class="field-desc">Days present (full + half day counted as 0.5)</span></div>
+    <div class="field-row"><span class="field-name">absent_days</span><span class="field-type">NUMBER</span><span class="field-desc">Absent without approved leave</span></div>
+    <div class="field-row"><span class="field-name">late_count</span><span class="field-type">NUMBER</span><span class="field-desc">Number of late arrivals — for deduction rule if configured</span></div>
+    <div class="field-row"><span class="field-name">total_late_minutes</span><span class="field-type">NUMBER</span><span class="field-desc">Total late minutes in month</span></div>
+    <div class="field-row"><span class="field-name">total_working_hours</span><span class="field-type">NUMBER</span><span class="field-desc">Sum of net working hours after breaks</span></div>
+    <div class="field-row"><span class="field-name">overtime_hours</span><span class="field-type">NUMBER</span><span class="field-desc">Total OT hours (triggers OT pay if salary_rules configured)</span></div>
+    <div class="field-row"><span class="field-name">leaves_taken</span><span class="field-type">JSON</span><span class="field-desc">Per-type breakdown: CL: 2, SL: 0, EL: 1</span></div>
+    <div class="field-row"><span class="field-name">half_days</span><span class="field-type">NUMBER</span><span class="field-desc">Count of half-day attendances</span></div>
+    <div class="field-row"><span class="field-name">break_excess_minutes</span><span class="field-type">NUMBER</span><span class="field-desc">Total excess break time (if to be deducted)</span></div>
+  </div>
+
+  <h4>Export formats</h4>
+  <div class="spec-card" style="margin:.5rem 0">
+    <div class="spec-list" style="display:flex;flex-wrap:wrap;gap:6px;line-height:1">
+      <span class="nav-page">Excel (.xlsx) — full detail</span>
+      <span class="nav-page">CSV — for salary software import</span>
+      <span class="nav-page">PDF — printable payroll summary</span>
+      <span class="nav-page">Custom column mapping (match target software's column names)</span>
+    </div>
+  </div>
+</div>
+
+<!-- S12: AUDIT LOGS -->
+<div class="section" id="s12">
+  <div class="sec-hdr"><span class="sec-n">12</span><span class="sec-title">Audit Logs</span><span class="sec-tag tag-red">IMMUTABLE</span></div>
+  <p class="prose">Append-only log of every system action. No edit, no delete. Super Admin view only. Exportable for compliance.</p>
+
+  <h4>Events logged</h4>
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin:.5rem 0">
+    <table class="mini-tbl">
+      <tr><th>Category</th><th>Events tracked</th></tr>
+      <tr><td><span class="badge b-blue">Auth</span></td><td>Login, logout, failed login, password change, token refresh</td></tr>
+      <tr><td><span class="badge b-green">Attendance</span></td><td>Check-in, check-out, break start, break end, manual edit (with before/after)</td></tr>
+      <tr><td><span class="badge b-warn">Correction</span></td><td>Request submitted, approved, rejected, escalated</td></tr>
+      <tr><td><span class="badge b-blue">Staff</span></td><td>Employee created, edited, deactivated, face enrolled, device bound/reset</td></tr>
+      <tr><td><span class="badge b-gray">Config</span></td><td>Shift created/edited, department edited, settings changed, holiday added</td></tr>
+      <tr><td><span class="badge b-red">Export</span></td><td>Report generated, payroll exported (who exported, what, when)</td></tr>
+    </table>
+  </div>
+
+  <h4>Log record fields</h4>
+  <div class="callout">Each log entry captures: <code>user_id</code> · <code>user_role</code> · <code>action</code> · <code>entity_type</code> · <code>entity_id</code> · <code>old_value (JSON)</code> · <code>new_value (JSON)</code> · <code>ip_address</code> · <code>device_info</code> · <code>created_at</code> · <code>session_id</code></div>
+</div>
+
+<!-- S13: SETTINGS -->
+<div class="section" id="s13">
+  <div class="sec-hdr"><span class="sec-n">13</span><span class="sec-title">Settings</span><span class="sec-tag tag-blue">SCREEN</span></div>
+
+  <div class="spec-grid">
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-building-hospital" aria-hidden="true"></i> Hospital info</div>
+      <div class="spec-list">
+        <span>Hospital name, logo, address</span>
+        <span>Contact number for reports</span>
+        <span>Branch list (multi-branch)</span>
+        <span>Admin user management</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-map-pin" aria-hidden="true"></i> Geo-fence config</div>
+      <div class="spec-list">
+        <span>Hospital centroid lat/lng (map picker)</span>
+        <span>Global radius in meters</span>
+        <span>Per-department radius override</span>
+        <span>Mock GPS detection toggle</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-face-id" aria-hidden="true"></i> Face recognition</div>
+      <div class="spec-list">
+        <span>Match threshold (default 95%)</span>
+        <span>Liveness check toggle</span>
+        <span>Re-enrollment trigger (days since last)</span>
+        <span>Fallback: OTP-based check-in (emergency)</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-brand-whatsapp" aria-hidden="true"></i> Notifications</div>
+      <div class="spec-list">
+        <span>WhatsApp Business API key</span>
+        <span>FCM server key</span>
+        <span>Alert triggers on/off (late, absent, OT)</span>
+        <span>Alert recipient config per event</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-calendar-event" aria-hidden="true"></i> Holiday calendar</div>
+      <div class="spec-list">
+        <span>Add national / regional holidays</span>
+        <span>Mark as paid / unpaid</span>
+        <span>Bulk import from CSV</span>
+        <span>Per-branch holiday override</span>
+      </div>
+    </div>
+    <div class="spec-card">
+      <div class="spec-card-title"><i class="ti ti-file-analytics" aria-hidden="true"></i> Scheduled reports</div>
+      <div class="spec-list">
+        <span>Configure auto-email daily summary</span>
+        <span>Monthly payroll export schedule</span>
+        <span>Recipient email list per report</span>
+        <span>Report format preference</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S14: PERMISSIONS & API -->
+<div class="section" id="s14">
+  <div class="sec-hdr"><span class="sec-n">14</span><span class="sec-title">Permission Matrix & API</span><span class="sec-tag tag-green">DEV</span></div>
+
+  <h4>Role permission matrix</h4>
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);overflow:auto;margin:.5rem 0">
+    <table class="perm-table">
+      <tr><th>Module</th><th>Super Admin</th><th>HR Manager</th><th>Dept Head</th><th>View Only</th></tr>
+      <tr><td>Dashboard</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span> own dept</td><td><span class="tick">✓</span></td></tr>
+      <tr><td>Live Monitor</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span> own dept</td><td><span class="cross">—</span></td></tr>
+      <tr><td>Staff — View</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span> own dept</td><td><span class="cross">—</span></td></tr>
+      <tr><td>Staff — Edit / Add</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+      <tr><td>Attendance Records</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span> own dept</td><td><span class="cross">—</span></td></tr>
+      <tr><td>Attendance Edit</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+      <tr><td>Corrections Approve</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span> stage 1</td><td><span class="cross">—</span></td></tr>
+      <tr><td>Shift Management</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+      <tr><td>Leave Approve</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span> own dept</td><td><span class="cross">—</span></td></tr>
+      <tr><td>Reports — Generate</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="tick">✓</span> own dept</td><td><span class="cross">—</span></td></tr>
+      <tr><td>Payroll Export</td><td><span class="tick">✓</span></td><td><span class="tick">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+      <tr><td>Audit Logs</td><td><span class="tick">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+      <tr><td>Settings</td><td><span class="tick">✓</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="cross">—</span></td></tr>
+    </table>
+  </div>
+
+  <h4>REST API endpoints (Admin Panel consumes)</h4>
+  <div style="border:0.5px solid var(--border);border-radius:var(--rl);overflow:hidden;margin:.5rem 0">
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/attendance/today</div><div class="api-desc">Dashboard KPIs for today with dept breakdown</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/attendance/live</div><div class="api-desc">Real-time status of all staff (WebSocket fallback)</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/attendance/records</div><div class="api-desc">Paginated records with filter params (date, dept, status)</div></div>
+    <div class="api-row"><div class="api-method put">PUT</div><div class="api-path">/api/attendance/{id}</div><div class="api-desc">Manual edit attendance record (HR only, audit-logged)</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/employees</div><div class="api-desc">Paginated employee list with search + filters</div></div>
+    <div class="api-row"><div class="api-method post">POST</div><div class="api-path">/api/employees</div><div class="api-desc">Create new employee</div></div>
+    <div class="api-row"><div class="api-method put">PUT</div><div class="api-path">/api/employees/{id}</div><div class="api-desc">Update employee. Face template update triggers re-enrollment.</div></div>
+    <div class="api-row"><div class="api-method post">POST</div><div class="api-path">/api/employees/{id}/face</div><div class="api-desc">Upload face frames, trigger ArcFace template generation</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/corrections</div><div class="api-desc">Pending correction requests queue</div></div>
+    <div class="api-row"><div class="api-method post">POST</div><div class="api-path">/api/corrections/{id}/approve</div><div class="api-desc">Approve correction, updates attendance record</div></div>
+    <div class="api-row"><div class="api-method post">POST</div><div class="api-path">/api/corrections/{id}/reject</div><div class="api-desc">Reject with mandatory reason</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/reports/generate</div><div class="api-desc">Trigger report job with type, date range, dept params. Returns job_id.</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/reports/download/{job_id}</div><div class="api-desc">Poll job status. Returns file URL when ready.</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/payroll/export</div><div class="api-desc">Generate payroll attendance CSV/Excel for given month</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/audit-logs</div><div class="api-desc">Audit log with filters (user, action, date) — SA only</div></div>
+    <div class="api-row"><div class="api-method get">GET</div><div class="api-path">/api/settings</div><div class="api-desc">Get hospital settings (geo-fence, thresholds, toggles)</div></div>
+    <div class="api-row"><div class="api-method put">PUT</div><div class="api-path">/api/settings</div><div class="api-desc">Update settings — SA only, audit-logged</div></div>
+  </div>
+
+  <div class="callout" style="margin-top:1rem"><strong>Auth header:</strong> All admin endpoints require <code>Authorization: Bearer &lt;JWT&gt;</code>. Token expiry: 15 min access token + 7-day refresh token. Role claim in JWT payload used for server-side RBAC on every route. Rate limit: 300 req/min per IP on admin endpoints.</div>
+</div>
+
+</div>

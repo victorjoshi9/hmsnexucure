@@ -1,0 +1,676 @@
+HAMS · Full API Reference · v1.0
+Flutter App + Admin Panel
+Complete API Specification
+Every endpoint the Flutter staff app and the Next.js admin panel consume. All methods, paths, request bodies, responses, and role guards. Base URL: https://api.hams.divyamhospital.in/api/v1
+ASP.NET Core 9
+JWT Auth
+85+ Endpoints
+12 Modules
+REST + SignalR
+Flutter + Next.js
+Modules
+01
+Auth & Session
+02
+Dashboard
+03
+Employees
+04
+Face & Device
+05
+Attendance
+06
+Breaks
+07
+Corrections
+08
+Shifts
+09
+Departments
+10
+Leave
+11
+Reports & Payroll
+12
+Notifications & Audit
+Global headers (all authenticated requests):
+Authorization: Bearer <access_token>
+Content-Type: application/json
+X-Device-ID: <device_uuid> (Flutter app only)
+X-App-Version: 1.0.0
+
+Role tags: SA Super Admin only   HR HR + SA   DH Dept Head + HR + SA   ALL Any authenticated user
+01
+Auth & Session
+AUTH
+Authentication
+POST
+/auth/login
+Login with employee_code + password. Returns access_token (15 min), refresh_token (7 days), employee profile, and role.
+PUBLIC
+Request body
+"employee_code": "DVH-042",
+"password": "••••••••",
+"device_id": "uuid-xxxx" // Flutter only
+Response 200
+"access_token": "eyJ...",
+"refresh_token": "eyJ...",
+"expires_in": 900,
+"employee": { id, name, role, dept, shift, photo_url },
+"requires_face_enrollment": false
+POST
+/auth/refresh
+Exchange refresh_token for new access_token. Called automatically by Flutter Dio interceptor on 401.
+PUBLIC
+Request body
+"refresh_token": "eyJ..."
+POST
+/auth/logout
+Revoke refresh token. Clears server-side session. Flutter calls this on manual logout.
+ALL
+POST
+/auth/otp/send
+Send OTP to registered mobile number. Used when biometric fails or emergency login needed.
+PUBLIC
+Request body
+"mobile": "9876543210"
+POST
+/auth/otp/verify
+Verify OTP and return auth tokens. Skips face check — logged as OTP login in audit.
+PUBLIC
+Request body
+"mobile": "9876543210",
+"otp": "847291",
+"device_id": "uuid-xxxx"
+PUT
+/auth/password/change
+Change own password. Requires current password. Invalidates all existing refresh tokens.
+ALL
+Request body
+"current_password": "••••",
+"new_password": "••••",
+"confirm_password": "••••"
+POST
+/auth/password/reset-request
+Admin triggers password reset for an employee. Sends OTP/link to mobile. Admin-only.
+HR
+Request body
+"employee_id": "uuid"
+GET
+/auth/me
+Get own profile from token. Flutter calls on app start to verify session and refresh employee data.
+ALL
+02
+Dashboard
+SUMMARY
+Dashboard KPIs & summary
+GET
+/dashboard/today
+All KPIs for today: total staff, present, absent, late, on-break, checked-out, on-leave count. Used by admin panel dashboard and Flutter staff home screen.
+DH
+?dept_id=uuid (optional)
+Response
+"total_staff": 120, "present": 95, "absent": 15,
+"late": 8, "on_break": 7, "checked_out": 12,
+"on_leave": 3, "pending_corrections": 4
+GET
+/dashboard/weekly-trend
+Attendance % per day for the last 7 days. Used for line chart on admin dashboard.
+HR
+GET
+/dashboard/dept-summary
+Today's attendance % per department. Bar chart data source.
+HR
+GET
+/dashboard/alerts
+Live alert feed: late arrivals, break violations, absent-without-leave, pending requests. Paginated. Admin panel right column.
+HR
+?limit=20&page=1
+GET
+/dashboard/my-stats
+Current employee's own monthly summary: days present, absent, late, OT, leave balance. Flutter home screen widget.
+ALL
+03
+Employees
+CRUD
+Employee management
+GET
+/employees
+Paginated employee list with search and filters. Admin panel staff list page.
+HR
+?search=raj&dept_id=uuid&shift_id=uuid&status=active&page=1&limit=20
+Response items include
+id, employee_code, full_name, designation, dept, shift, face_enrolled, device_bound, is_active, photo_url, joining_date
+GET
+/employees/{id}
+Full employee profile including shift detail, leave balances, face enrollment status, device info.
+HR
+POST
+/employees
+Create new employee. Auto-generates employee_code if not provided. Triggers face enrollment reminder notification.
+HR
+Request body
+"full_name": "Raj Sharma",
+"mobile": "9876543210",
+"email": "raj@divyam.in",
+"department_id": "uuid",
+"designation": "Staff Nurse",
+"shift_id": "uuid",
+"joining_date": "2026-06-14",
+"employee_code": "DVH-042" // optional,
+"weekly_off": ["Sunday"],
+"role": "staff" // staff|dept_head|hr|super_admin
+PUT
+/employees/{id}
+Update employee. Any change is audit-logged. Shift change takes effect next working day.
+HR
+Same fields as POST, all optional
+PATCH
+/employees/{id}/status
+Activate or deactivate employee. Inactive employees cannot check in. Device binding preserved.
+HR
+Request body
+"is_active": false,
+"reason": "Resigned"
+POST
+/employees/{id}/photo
+Upload/replace profile photo. Multipart/form-data. Max 2MB. Returns photo_url.
+HR
+multipart/form-data
+GET
+/employees/{id}/attendance-summary
+Monthly summary for an employee: days present/absent/late, total working hours, OT hours. Used in admin staff profile view.
+HR
+?month=2026-06
+DELETE
+/employees/{id}
+Soft delete. Marks employee as deleted, preserves all attendance history. SA only. Cannot be undone from app.
+SA
+04
+Face Recognition & Device
+SECURITY
+Face enrollment & device binding
+POST
+/employees/{id}/face/enroll
+Upload 5 face frames for template generation. Server runs ArcFace embedding. Returns quality score per frame and final match confidence. Admin webcam enrollment.
+HR
+multipart/form-data · 5 images
+Response
+"template_id": "uuid",
+"frames_quality": [98, 97, 95, 99, 96],
+"enrollment_score": 97.2,
+"status": "enrolled"
+POST
+/employees/{id}/face/verify
+Verify a single live face frame against stored template. Called by Flutter during check-in/break before submitting attendance. Returns match score.
+ALL
+multipart · 1 image + liveness data
+Request (multipart)
+image: binary frame
+"liveness_blink": true,
+"liveness_head_turn": true
+Response
+"match": true, "score": 97.4,
+"liveness_passed": true,
+"verify_token": "short-lived-uuid" // pass to check-in
+DELETE
+/employees/{id}/face
+Delete face template. Employee must re-enroll before next check-in. SA/HR only.
+HR
+POST
+/employees/{id}/device/bind
+Bind a specific device_id to employee. Called automatically on first Flutter login. Admin can force-bind from panel.
+HR
+Request body
+"device_id": "uuid-xxxx",
+"device_model": "Samsung Galaxy A54",
+"os_version": "Android 14"
+DELETE
+/employees/{id}/device
+Reset device binding. Employee must log in on new device. Admin does this when phone is lost/replaced.
+HR
+05
+Attendance
+CORE
+Check-in, check-out, records
+POST
+/attendance/check-in
+Mark check-in. Requires verify_token from face/verify call + GPS coordinates. Server validates geo-fence, device binding, mock GPS, and shift window. Returns attendance record with computed status.
+ALL
+Request body
+"verify_token": "uuid" // from /face/verify,
+"latitude": 28.024511,
+"longitude": 73.312445,
+"accuracy_meters": 8,
+"is_mock_location": false // Flutter GPS flag,
+"device_id": "uuid"
+Response 201
+"attendance_id": "uuid",
+"check_in_time": "2026-06-14T08:58:00Z",
+"status": "present",
+"late_minutes": 0,
+"shift": { start, end, name }
+POST
+/attendance/check-out
+Mark check-out. Requires verify_token + GPS. Server computes working hours, overtime, early leave flag.
+ALL
+Request body
+"verify_token": "uuid",
+"latitude": 28.024511,
+"longitude": 73.312445,
+"device_id": "uuid"
+Response 200
+"check_out_time": "2026-06-14T17:12:00Z",
+"working_hours": 7.4,
+"break_total_minutes": 62,
+"overtime_minutes": 12,
+"early_leave": false
+GET
+/attendance/my-today
+Get current employee's today attendance record including status, check-in time, elapsed hours, active break. Flutter home screen polling (every 60s).
+ALL
+GET
+/attendance/my-history
+Own attendance history with pagination. Flutter attendance history screen.
+ALL
+?month=2026-06&page=1&limit=31
+GET
+/attendance/live
+Real-time status of all employees for admin live monitor. Returns current status per employee. WebSocket replaces this when connected.
+DH
+?dept_id=uuid&status=working&page=1&limit=50
+GET
+/attendance/records
+Admin attendance records table — all employees, filterable. Paginated. Used in admin attendance records screen.
+HR
+?from=2026-06-01&to=2026-06-30&employee_id=uuid&dept_id=uuid&status=late&page=1&limit=50
+Response items
+id, employee (id, name, code), date, check_in, check_out, break_total_min, working_hours, late_minutes, overtime_minutes, status, edited_by
+GET
+/attendance/{id}
+Single attendance record with full detail: breaks list, face scores, GPS coordinates, edit history.
+HR
+PUT
+/attendance/{id}
+Manual edit attendance record. HR/SA only. Requires edit_reason. Writes before/after to audit_logs. Recomputes working hours and status.
+HR
+Request body
+"check_in_time": "2026-06-14T09:00:00Z" // optional,
+"check_out_time": "2026-06-14T17:00:00Z" // optional,
+"status": "present" // optional override,
+"edit_reason": "System GPS failure at gate"
+06
+Break Management
+FLUTTER
+Break start & end
+POST
+/attendance/{attendance_id}/breaks/start
+Start a break. Requires face verify_token + GPS. Server logs break start, updates status to "on_break". Validates no open break already running.
+ALL
+Request body
+"verify_token": "uuid",
+"break_type": "lunch" // lunch|tea|personal|emergency,
+"latitude": 28.024511,
+"longitude": 73.312445
+Response
+"break_id": "uuid",
+"start_time": "2026-06-14T13:00:00Z",
+"allowed_minutes": 60
+POST
+/attendance/{attendance_id}/breaks/{break_id}/end
+End active break. Requires face verify_token. Computes duration, flags violation if over limit. Updates status to "working".
+ALL
+Request body
+"verify_token": "uuid"
+Response
+"duration_minutes": 68,
+"is_violation": true,
+"excess_minutes": 8,
+"total_break_today": 83
+GET
+/attendance/{attendance_id}/breaks
+List all breaks for an attendance record. Flutter break history. Admin sub-view in attendance detail.
+ALL
+07
+Attendance Corrections
+WORKFLOW
+Correction request workflow
+POST
+/corrections
+Submit a correction request from Flutter app. Creates pending request, notifies dept head and HR via FCM.
+ALL
+Request body
+"attendance_date": "2026-06-14",
+"type": "forgot_check_in" // forgot_check_in|forgot_check_out|wrong_status|location_issue,
+"requested_value": "09:00" // time or status,
+"reason": "Gate scanner was offline",
+"document_url": null // optional upload
+GET
+/corrections
+Admin: all correction requests. Flutter: own requests only (filtered by auth). Supports status filter.
+DH
+?status=pending&dept_id=uuid&page=1&limit=20
+GET
+/corrections/my
+Own correction requests for Flutter. Status tracking screen.
+ALL
+POST
+/corrections/{id}/approve
+Approve correction. Updates attendance record, logs approval, notifies employee. HR required for final approval; DH for stage-1 only.
+HR
+Request body
+"note": "Verified with supervisor" // optional
+POST
+/corrections/{id}/reject
+Reject correction request. Reason mandatory. Notifies employee via FCM + WhatsApp.
+DH
+Request body
+"reason": "Insufficient evidence provided"
+08
+Shift Management
+CONFIG
+Shifts CRUD
+GET
+/shifts
+All shifts list. Flutter uses this to display shift detail on home screen. Admin uses for dropdowns.
+ALL
+GET
+/shifts/{id}
+Single shift detail: timings, grace, break limits, OT rules, weekly off, assigned departments.
+ALL
+POST
+/shifts
+Create new shift. Immediately available for assignment.
+HR
+Request body
+"name": "Morning Shift",
+"start_time": "07:00",
+"end_time": "15:00",
+"grace_minutes": 10,
+"half_day_threshold": "10:00",
+"early_leave_buffer_min": 15,
+"total_break_limit_min": 60,
+"ot_threshold_min": 30,
+"weekly_off": ["Sunday"],
+"color": "#378ADD"
+PUT
+/shifts/{id}
+Update shift. Changes apply from next working day to assigned employees.
+HR
+Same fields as POST
+DELETE
+/shifts/{id}
+Delete shift only if no employees are currently assigned. Returns 409 if assigned.
+SA
+POST
+/shifts/{id}/assign
+Assign shift to list of employee IDs or an entire department.
+HR
+Request body
+"employee_ids": ["uuid1","uuid2"] // or,
+"department_id": "uuid" // assign entire dept,
+"effective_date": "2026-06-15"
+09
+Departments
+CONFIG
+Department CRUD
+GET
+/departments
+All departments list. Used in dropdowns across admin panel and Flutter filters.
+ALL
+GET
+/departments/{id}
+Department detail: head, default shift, geo-fence override, staff count, floor info.
+DH
+POST
+/departments
+SA
+Request body
+"name": "ICU",
+"code": "ICU",
+"head_employee_id": "uuid",
+"default_shift_id": "uuid",
+"geo_fence_override_meters": 150,
+"floor_wing": "Wing B, Floor 2"
+PUT
+/departments/{id}
+Update department. Same fields as POST, all optional.
+SA
+GET
+/departments/{id}/staff
+All employees in a department with current status. Dept Head dashboard view.
+DH
+10
+Leave Management
+WORKFLOW
+Leave types, requests, balances
+GET
+/leave/types
+All configured leave types with allowed days per year. Flutter leave application dropdown source.
+ALL
+POST
+/leave/types
+Create new leave type (e.g. Maternity Leave). SA only.
+SA
+Request body
+"name": "Maternity Leave",
+"code": "ML",
+"days_per_year": 180,
+"is_paid": true,
+"requires_document": true,
+"gender_restricted": "female"
+POST
+/leave/requests
+Apply for leave from Flutter app. Checks balance, validates date range, notifies manager.
+ALL
+Request body
+"leave_type_id": "uuid",
+"from_date": "2026-06-20",
+"to_date": "2026-06-21",
+"reason": "Family function",
+"document_url": null
+GET
+/leave/requests
+All leave requests for admin. Own requests for Flutter. Status filter supported.
+DH
+?status=pending&dept_id=uuid&month=2026-06
+GET
+/leave/requests/my
+Own leave history with statuses. Flutter leave tracking screen.
+ALL
+POST
+/leave/requests/{id}/approve
+Approve leave. Deducts from balance. Auto-marks attendance as "on_leave" for those dates. Sends FCM + WhatsApp to employee.
+DH
+Request body
+"note": "Approved" // optional
+POST
+/leave/requests/{id}/reject
+Reject leave request. Reason mandatory. No balance change.
+DH
+Request body
+"reason": "Critical duty period"
+DELETE
+/leave/requests/{id}
+Cancel a pending leave request. Only the requester or HR can cancel. Cannot cancel approved leave that has started.
+ALL
+GET
+/leave/balance/{employee_id}
+Leave balance per type for an employee. Flutter shows own balance. Admin can check any employee.
+ALL
+PUT
+/leave/balance/{employee_id}
+Manually adjust leave balance. SA/HR only. Logged to audit.
+HR
+Request body
+"leave_type_id": "uuid",
+"adjustment": 2 // positive or negative,
+"reason": "Annual carry-forward"
+GET
+/leave/calendar
+Calendar data: all approved leaves mapped to dates. Admin leave calendar view. Filter by dept.
+DH
+?month=2026-06&dept_id=uuid
+GET
+/holidays
+All configured holidays for current year. Flutter uses to mark holidays on calendar. Admin settings source.
+ALL
+POST
+/holidays
+Add a holiday to the calendar. Takes effect immediately for all shifts.
+SA
+Request body
+"name": "Diwali",
+"date": "2026-10-20",
+"is_paid": true,
+"branch_id": null // null = all branches
+DELETE
+/holidays/{id}
+Remove a holiday. SA only.
+SA
+11
+Reports & Payroll
+EXPORT
+Report generation (async job-based)
+POST
+/reports/generate
+Queue a report generation job. Returns job_id immediately. Large reports run via Hangfire background job. Poll /reports/jobs/{job_id} for status.
+HR
+Request body
+"type": "monthly_staff" // daily|monthly_staff|dept|late_arrivals|overtime|break_violations|leave_summary|payroll,
+"format": "pdf" // pdf|excel|csv,
+"from_date": "2026-06-01",
+"to_date": "2026-06-30",
+"dept_id": null // null = all,
+"employee_id": null // null = all,
+"shift_id": null,
+"email_to": ["hr@divyam.in"] // optional email delivery
+Response 202
+"job_id": "uuid",
+"status": "queued",
+"estimated_seconds": 15
+GET
+/reports/jobs/{job_id}
+Poll job status. When completed, returns download_url (expires in 1 hour). Admin panel polls every 3s until done.
+HR
+Response when done
+"status": "completed",
+"download_url": "https://s3.../report-uuid.pdf",
+"expires_at": "2026-06-14T20:00:00Z",
+"row_count": 120
+GET
+/reports/jobs
+Recent report jobs list for current admin user. Shows status, type, format, date.
+HR
+GET
+/reports/quick/daily
+Synchronous small daily report for a single date. Returns JSON data (no file). Used by admin dashboard table view.
+DH
+?date=2026-06-14&dept_id=uuid
+POST
+/payroll/export
+Generate payroll attendance data export for a month. Returns async job_id same as /reports/generate. Output includes working_days, absent_days, OT hours, late_count, leave breakdown per employee.
+HR
+Request body
+"month": "2026-06",
+"format": "excel" // excel|csv|pdf,
+"dept_id": null,
+"include_break_details": true
+GET
+/payroll/summary/{employee_id}
+Monthly payroll summary JSON for one employee: all computed attendance fields for salary calculation.
+HR
+?month=2026-06
+12
+Notifications, Settings & Audit
+SYSTEM
+Notifications
+GET
+/notifications
+Own notifications list. Flutter notification bell. Supports unread filter.
+ALL
+?unread=true&page=1&limit=20
+PATCH
+/notifications/{id}/read
+Mark a single notification as read.
+ALL
+PATCH
+/notifications/read-all
+Mark all own notifications as read.
+ALL
+POST
+/notifications/fcm-token
+Register/update Firebase FCM token for current device. Flutter calls on every app launch.
+ALL
+Request body
+"fcm_token": "fcm-token-string",
+"device_id": "uuid"
+Settings
+GET
+/settings
+All hospital settings: geo-fence config, face threshold, WhatsApp key, FCM key, alert toggles, report schedule. SA reads all; staff reads geo-fence + hospital info only.
+ALL
+PUT
+/settings
+Update settings. SA only. Every change audit-logged with old/new value.
+SA
+Request body (partial update supported)
+"geo_fence_lat": 28.024511,
+"geo_fence_lng": 73.312445,
+"geo_fence_radius_m": 100,
+"face_match_threshold": 95,
+"mock_gps_detection": true,
+"whatsapp_api_key": "••••",
+"late_alert_enabled": true,
+"absent_alert_enabled": true,
+"ot_alert_enabled": false,
+"report_email_recipients": ["hr@divyam.in"]
+GET
+/settings/report-schedules
+List configured auto-report schedules (daily summary at 9pm, monthly payroll on 1st, etc.).
+SA
+POST
+/settings/report-schedules
+Create a new scheduled report. Hangfire cron job created on server.
+SA
+Request body
+"report_type": "daily",
+"cron": "0 21 * * *" // every day 9pm,
+"format": "pdf",
+"email_to": ["owner@divyam.in"]
+DELETE
+/settings/report-schedules/{id}
+Remove a scheduled report.
+SA
+Audit logs
+GET
+/audit-logs
+Paginated, immutable audit log. Filter by user, action category, date range. SA only. No edit/delete endpoint exists for this resource — by design.
+SA
+?user_id=uuid&action=attendance&from=2026-06-01&to=2026-06-30&page=1&limit=50
+Response items
+id, user (id, name, role), action, entity_type, entity_id, old_value, new_value, ip_address, device_info, created_at
+POST
+/audit-logs/export
+Export audit logs as Excel/CSV for compliance. Async job, same as /reports/generate pattern.
+SA
+Request body
+"from_date": "2026-06-01",
+"to_date": "2026-06-30",
+"format": "excel"
+WebSocket — SignalR hub
+GET
+/hubs/attendance
+SignalR WebSocket hub. Admin panel connects for real-time live monitor. Flutter connects for real-time status updates on home screen.
+ALL
+Client subscribes to events
+OnCheckIn — { employee_id, name, time, status }
+OnCheckOut — { employee_id, name, time, working_hours }
+OnBreakStart — { employee_id, break_type, time }
+OnBreakEnd — { employee_id, duration_min, is_violation }
+OnAbsenceAlert — { employee_id, shift_ended_at }
+OnCorrectionRequest — { request_id, employee_name, type } // admin only
+Standard error shape:
+{ "error": { "code": "FACE_MISMATCH", "message": "Face match score 72% below threshold 95%", "field": null } }
+
+Common error codes: UNAUTHORIZED · FORBIDDEN · DEVICE_NOT_BOUND · FACE_MISMATCH · LIVENESS_FAILED · OUTSIDE_GEOFENCE · MOCK_GPS_DETECTED · ALREADY_CHECKED_IN · NO_ACTIVE_BREAK · BREAK_ALREADY_ACTIVE · LEAVE_BALANCE_EXCEEDED · SHIFT_NOT_ASSIGNED

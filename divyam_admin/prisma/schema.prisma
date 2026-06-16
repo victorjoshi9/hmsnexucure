@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+}
+
+// ── Models ─────────────────────────────────────────────
+
+model Department {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  employees Employee[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model Shift {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  startTime      String     // Format HH:mm
+  endTime        String     // Format HH:mm
+  graceMinutes   Int        @default(10)
+  breakLimitMin  Int        @default(60)
+  otThresholdMin Int        @default(30)
+  employees      Employee[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model Employee {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  employeeCode   String          @unique
+  fullName       String
+  departmentId   String          @db.ObjectId
+  department     Department      @relation(fields: [departmentId], references: [id])
+  shiftId        String          @db.ObjectId
+  shift          Shift           @relation(fields: [shiftId], references: [id])
+  deviceId       String?
+  faceTemplateId String?
+  isActive       Boolean         @default(true)
+  supabaseUserId String?         @unique // Linked to Supabase Auth (for Admin access)
+  role           Role            @default(STAFF)
+  attendances    Attendance[]
+  leaveRequests  LeaveRequest[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Attendance {
+  id             String     @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId     String     @db.ObjectId
+  employee       Employee   @relation(fields: [employeeId], references: [id])
+  date           DateTime   // Stored as date only
+  checkInTime    DateTime
+  checkOutTime   DateTime?
+  lat            Float?
+  lng            Float?
+  faceScore      Float?
+  status         AttendanceStatus
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model LeaveRequest {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  employeeId  String      @db.ObjectId
+  employee    Employee    @relation(fields: [employeeId], references: [id])
+  leaveType   LeaveType
+  fromDate    DateTime
+  toDate      DateTime
+  status      LeaveStatus @default(PENDING)
+  approvedById String?    @db.ObjectId
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+// ── Enums ──────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  HR_MANAGER
+  DEPT_HEAD
+  STAFF
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  HALF_DAY
+  ABSENT
+}
+
+enum LeaveType {
+  SICK
+  CASUAL
+  EARNED
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

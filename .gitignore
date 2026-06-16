@@ -1,0 +1,66 @@
+# ─── Node / Next.js ───────────────────────────────
+node_modules/
+.next/
+out/
+.vercel/
+.firebase/
+*.log
+npm-debug.log*
+
+# ─── Flutter / Dart ───────────────────────────────
+divyam_payroll/build/
+divyam_payroll/.dart_tool/
+divyam_payroll/.flutter-plugins
+divyam_payroll/.flutter-plugins-dependencies
+divyam_payroll/.packages
+divyam_payroll/.pub-cache/
+divyam_payroll/.pub/
+divyam_payroll/android/.gradle/
+divyam_payroll/android/app/build/
+divyam_payroll/android/build/
+divyam_payroll/android/local.properties
+divyam_payroll/ios/Pods/
+divyam_payroll/ios/.symlinks/
+divyam_payroll/ios/Flutter/Flutter.framework
+divyam_payroll/ios/Flutter/Flutter.podspec
+divyam_payroll/ios/Runner.xcworkspace/xcshareddata/
+divyam_payroll/linux/flutter/
+divyam_payroll/macos/Flutter/
+divyam_payroll/windows/flutter/
+
+# ─── Environment & Secrets ────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+client_secret*.json
+google-services.json
+GoogleService-Info.plist
+*firebase-adminsdk*.json
+
+# ─── IDE ──────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── Prisma ───────────────────────────────────────
+divyam_admin/prisma/*.db
+
+# ─── Build artifacts ─────────────────────────────
+*.tgz
+coverage/
+
+# ─── Firebase hosting cache ──────────────────────
+.firebase/
+.firebaserc
+
+# ─── Junie ───────────────────────────────────────
+.junie/
+
+# ─── Lock files (keep one per project) ───────────
+# Keep package-lock.json and pubspec.lock, ignore pnpm
+divyam_admin/pnpm-lock.yaml
